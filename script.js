@@ -16,17 +16,43 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const initial=()=>({version:1,baseStart:"2026-11-09",schedule:SUBJECTS.map(a=>a.map((subject,i)=>({subject,room:"",teacher:"",description:"",id:`${Date.now()}-${i}-${Math.random()}`}))),bells:START.map((start,i)=>({start,end:END[i]})),breaks:clone(BREAKS),exceptions:{},settings:{theme:"light",motion:true}});
 let data;
 try{data=JSON.parse(localStorage.getItem("lx-sharaga-v3"))||initial()}catch{data=initial()}
-let syncTimer=null;
-function save(){localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));const status=byId("saveStatus");if(status)status.textContent="Сохранено в этом браузере";if(githubConfig().owner&&githubConfig().repo&&sessionStorage.getItem("lx-gh-token")){clearTimeout(syncTimer);syncTimer=setTimeout(()=>githubPush().catch(e=>setGithubStatus("Ошибка синхронизации: "+e.message)),1200)}}
-function githubConfig(){return JSON.parse(localStorage.getItem("lx-gh-config")||"{}")} 
-function setGithubStatus(t){const el=byId("githubStatus");if(el)el.textContent=t}
-function ghHeaders(token){return {"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","Content-Type":"application/json"}}
-async function githubPush(){const c=githubConfig(),token=sessionStorage.getItem("lx-gh-token");if(!c.owner||!c.repo||!token)throw Error("Заполни настройки GitHub и подключи токен.");const path=c.path||"data/schedule.json",branch=c.branch||"main",api=`https://api.github.com/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;let sha;const get=await fetch(api+`?ref=${encodeURIComponent(branch)}`,{headers:ghHeaders(token)});if(get.ok){const old=await get.json();sha=old.sha}else if(get.status!==404)throw Error("GitHub API: "+get.status+" "+(await get.text()).slice(0,250));const body={message:"Update LX SHARAGA schedule",content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2)))),branch};if(sha)body.sha=sha;const put=await fetch(api,{method:"PUT",headers:ghHeaders(token),body:JSON.stringify(body)});if(!put.ok)throw Error("Не удалось сохранить в GitHub: "+put.status+" "+(await put.text()).slice(0,300));setGithubStatus("Синхронизировано с GitHub · "+new Date().toLocaleTimeString())}
-async function githubPull(){const c=githubConfig();if(!c.owner||!c.repo)return;const branch=c.branch||"main",path=c.path||"data/schedule.json",url=`https://raw.githubusercontent.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/${encodeURIComponent(branch)}/${path.split("/").map(encodeURIComponent).join("/")}`;const r=await fetch(url+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw Error("Не удалось загрузить расписание из GitHub: "+r.status);const obj=await r.json();if(!obj||!Array.isArray(obj.schedule)||obj.schedule.length!==7||!Array.isArray(obj.bells)||!Array.isArray(obj.breaks))throw Error("В GitHub найден JSON неверного формата.");data={...data,...obj};localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));renderAll();setGithubStatus("Получено актуальное расписание из GitHub.")}
-function initGithubSettings(){const c=githubConfig();byId("ghOwner").value=c.owner||"";byId("ghRepo").value=c.repo||"";byId("ghBranch").value=c.branch||"main";byId("ghPath").value=c.path||"data/schedule.json";byId("ghToken").value="";if(c.owner&&c.repo)setGithubStatus("Репозиторий: "+c.owner+"/"+c.repo+" · токен нужно подключить в этой вкладке.")}
-byId("githubSaveBtn").onclick=()=>{const c={owner:byId("ghOwner").value.trim(),repo:byId("ghRepo").value.trim(),branch:byId("ghBranch").value.trim()||"main",path:byId("ghPath").value.trim()||"data/schedule.json"};if(!c.owner||!c.repo){setGithubStatus("Укажи owner и repository.");return}localStorage.setItem("lx-gh-config",JSON.stringify(c));const t=byId("ghToken").value.trim();if(t)sessionStorage.setItem("lx-gh-token",t);byId("ghToken").value="";setGithubStatus("Настройки сохранены. Проверяю доступ…");githubPush().catch(e=>setGithubStatus("Ошибка: "+e.message))};
-byId("githubSyncBtn").onclick=()=>githubPush().catch(e=>setGithubStatus("Ошибка: "+e.message));
-
+// Cloudflare Quick Tunnel URL. Обновляется при перезапуске Quick Tunnel.
+const API_BASE="https://ware-lot-smooth-knit.trycloudflare.com";
+let apiOnline=false;
+function apiStatus(message){const el=byId("apiStatus");if(el)el.textContent=message}
+function save(){localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));const status=byId("saveStatus");if(status)status.textContent="Изменения сохранены в браузере"}
+async function apiRequest(path,options={}) {
+  const response=await fetch(API_BASE+path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload.error||("HTTP "+response.status));
+  return payload;
+}
+async function checkApi(){
+  try{await apiRequest("/api/health");apiOnline=true;apiStatus("Сервер подключён. Расписание синхронизируется.");}
+  catch(e){apiOnline=false;apiStatus("Сервер недоступен: "+e.message);}
+}
+async function pullSchedule(){
+  try{
+    const obj=await apiRequest("/api/schedule");
+    if(!obj||!Array.isArray(obj.schedule)||obj.schedule.length!==7||!Array.isArray(obj.bells)||!Array.isArray(obj.breaks))throw new Error("Сервер вернул расписание неверного формата.");
+    data={...data,...obj};localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));renderAll();
+    apiStatus("Загружено актуальное школьное расписание с сервера.");
+  }catch(e){apiStatus("Не удалось загрузить расписание с сервера: "+e.message);}
+}
+async function saveToServer(){
+  let secret=sessionStorage.getItem("lx-api-secret");
+  if(!secret){secret=prompt("Введите пароль администратора из файла data/api_secret.txt");if(!secret)return;sessionStorage.setItem("lx-api-secret",secret);}
+  const button=byId("saveToServerBtn");if(button){button.disabled=true;button.textContent="Сохраняем…";}
+  try{
+    await apiRequest("/api/schedule",{method:"PUT",headers:{"Authorization":"Bearer "+secret},body:JSON.stringify(data)});
+    apiStatus("Расписание успешно сохранено на сервере. Telegram использует обновлённые данные.");
+    const status=byId("saveStatus");if(status)status.textContent="Сохранено на сервере";
+  }catch(e){
+    if(/401|парол/i.test(e.message)){sessionStorage.removeItem("lx-api-secret");}
+    apiStatus("Ошибка сохранения: "+e.message);
+    alert("Не удалось сохранить расписание на сервере: "+e.message);
+  }finally{if(button){button.disabled=false;button.textContent="Сохранить расписание";}}
+}
 let selectedDate=new Date(); selectedDate.setHours(0,0,0,0);
 let editorDay=0;
 const pad=n=>String(n).padStart(2,"0");
@@ -56,7 +82,7 @@ function renderSubjectEditor(){const wrap=byId("subjectEditor"),arr=data.schedul
 function renderBellEditor(){const be=byId("bellEditor"),br=byId("breakEditor");be.innerHTML="<h3>Звонки</h3>";data.bells.forEach((b,i)=>{const row=document.createElement("div");row.className="bell-edit";row.innerHTML=`<strong>${i+1} урок</strong><input type="time" value="${b.start}" aria-label="Начало"><input type="time" value="${b.end}" aria-label="Конец">`;row.querySelectorAll("input").forEach((inp,j)=>inp.addEventListener("change",()=>{b[j?"end":"start"]=inp.value;save();renderAll()}));be.append(row)});br.innerHTML="<h3>Перемены</h3>";data.breaks.forEach((b,i)=>{const row=document.createElement("div");row.className="bell-edit";row.innerHTML=`<strong>${i+1}</strong><input type="time" value="${b[0]}"><input type="time" value="${b[1]}">`;row.querySelectorAll("input").forEach((inp,j)=>inp.addEventListener("change",()=>{b[j]=inp.value;save();renderAll()}));br.append(row)})}
 function openEditor(){renderEditor();byId("editorDialog").showModal()}
 byId("editBtn").onclick=openEditor;byId("editorDay").onchange=e=>{editorDay=+e.target.value;renderSubjectEditor()};byId("addLessonBtn").onclick=()=>{data.schedule[editorDay].push({subject:"Новый урок",room:"",teacher:"",description:"",id:crypto.randomUUID?.()||String(Date.now())});save();renderSubjectEditor();renderAll()};
-byId("doneEditing").onclick=()=>{byId("editorDialog").close();renderAll()};byId("todayBtn").onclick=()=>{selectedDate=new Date();selectedDate.setHours(0,0,0,0);renderAll()};byId("calendarBtn").onclick=()=>{byId("datePicker").classList.toggle("visible");byId("datePicker").value=dateKey(selectedDate)};byId("datePicker").onchange=e=>{if(e.target.value){selectedDate=new Date(e.target.value+"T00:00:00");renderAll()}};
+byId("saveToServerBtn").onclick=saveToServer;byId("doneEditing").onclick=()=>{byId("editorDialog").close();renderAll()};byId("todayBtn").onclick=()=>{selectedDate=new Date();selectedDate.setHours(0,0,0,0);renderAll()};byId("calendarBtn").onclick=()=>{byId("datePicker").classList.toggle("visible");byId("datePicker").value=dateKey(selectedDate)};byId("datePicker").onchange=e=>{if(e.target.value){selectedDate=new Date(e.target.value+"T00:00:00");renderAll()}};
 byId("exportBtn").onclick=exportJSON;byId("backupBtn").onclick=exportJSON;
 byId("copyDayBtn").onclick=()=>{const target=prompt("В какой день скопировать? Введи номер 1–5.");const n=Number(target)-1;if(n>=0&&n<5&&n!==editorDay){data.schedule[n]=clone(data.schedule[editorDay]);save();alert("Расписание скопировано.")}else if(target!==null)alert("Укажи номер учебного дня от 1 до 5.")};
 byId("resetBtn").onclick=()=>{if(confirm("Восстановить исходное расписание? Все изменения расписания будут потеряны.")){data=initial();save();renderAll();renderEditor()}};
@@ -71,5 +97,5 @@ byId("telegramDone").onclick=()=>byId("telegramDialog").close();
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));byId("tab-"+t.dataset.tab).classList.remove("hidden")});
 applyTheme(data.settings.theme||"light");if(data.settings.motion===false)document.body.classList.add("no-motion");
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
-renderAll();setInterval(renderClock,1000);
+renderAll();checkApi();pullSchedule();setInterval(renderClock,1000);
 })();
