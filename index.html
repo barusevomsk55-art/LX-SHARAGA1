@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f1ff">
+  <meta name="description" content="LX ШАРАГА — умное школьное расписание и таймер звонков">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <title>LX ШАРАГА 3.0</title>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <span>✎</span><span>✦</span><span>⌁</span><span>∑</span><span>▱</span><span>✧</span><span>π</span>
+  </div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="LX ШАРАГА — главная"><span class="brand-mark">LX</span><span>ШАРАГА<small>3.0 · SCHOOL PLANNER</small></span></a>
+    <div class="top-actions">
+      <span class="live-clock" id="clock">--:--:--</span>
+      <button class="theme-switch" id="themeToggle" type="button" aria-label="Переключить тему" aria-pressed="false">
+        <span class="theme-track"><span class="theme-sun">☀</span><span class="theme-moon">☾</span><span class="theme-thumb"></span></span>
+        <span class="theme-label" id="themeLabel">Учебный день</span>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Настройки" aria-label="Настройки">⚙</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow" id="todayLabel">РАСПИСАНИЕ · 9–13 НОЯБРЯ 2026</div>
+        <h1>Твой учебный день,<br><span>под контролем.</span></h1>
+        <p>Уроки, звонки и перемены — всё в одном месте.</p>
+        <div class="date-line"><strong id="dateTitle">—</strong><span id="timezone">—</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true"><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="book">✎</div><div class="spark">✦</div></div>
+    </section>
+
+    <section class="status-grid">
+      <article class="panel status-panel">
+        <div class="panel-head"><span class="eyebrow">СЕЙЧАС</span><span class="live-dot"></span></div>
+        <h2 id="stateTitle">Загрузка расписания…</h2>
+        <p id="stateDescription">Определяем текущее событие</p>
+        <div class="countdown"><div><span id="timer">00:00:00</span><small id="timerCaption">до следующего события</small></div><div class="timer-icon">◷</div></div>
+      </article>
+      <article class="panel next-panel">
+        <div class="panel-head"><span class="eyebrow">СЛЕДУЮЩИЙ УРОК</span><span class="mini-tag" id="nextNumber">—</span></div>
+        <h2 id="nextSubject">—</h2>
+        <p id="nextTime">—</p>
+        <div class="next-bottom"><span id="nextRoom">Кабинет не указан</span><span class="arrow">↗</span></div>
+      </article>
+    </section>
+
+    <section class="section-heading">
+      <div><span class="eyebrow">ПЛАН НА ДЕНЬ</span><h2>Расписание</h2></div>
+      <div class="heading-actions">
+        <button class="soft-btn" id="todayBtn">Сегодня</button>
+        <button class="primary-btn" id="editBtn">✎ Редактировать</button>
+      </div>
+    </section>
+    <section class="day-nav" id="dayNav" aria-label="Дни недели"></section>
+    <section class="panel schedule-panel">
+      <div class="schedule-top"><div><strong id="scheduleDate">—</strong><span id="lessonCount">—</span></div><div class="schedule-tools"><button class="icon-btn" id="calendarBtn" title="Выбрать дату">▦</button><button class="icon-btn" id="exportBtn" title="Экспорт JSON">⇩</button></div></div>
+      <input type="date" id="datePicker" class="date-picker" aria-label="Выбрать дату">
+      <div id="scheduleList" class="schedule-list"></div>
+    </section>
+
+    <section class="lower-grid">
+      <article class="panel info-panel">
+        <span class="eyebrow">ЗВОНКИ</span><h3>Время по расписанию</h3>
+        <p>Звонки не зависят от названий предметов. Изменяй их отдельно в редакторе.</p>
+        <div class="bell-preview" id="bellPreview"></div>
+      </article>
+      <article class="panel telegram-panel">
+        <span class="eyebrow">TELEGRAM CONNECT</span><h3>Уведомления на телефоне</h3>
+        <p>Подключи Telegram-бота, чтобы получать напоминания о звонках и переменах.</p>
+        <div class="telegram-status"><span class="status-indicator"></span><span id="telegramStatus">Бот: @zvonki_school_bot</span></div>
+        <a class="telegram-link" id="telegramInfoBtn" href="https://t.me/zvonki_school_bot?start=lx_sharaga" target="_blank" rel="noopener">Подключить Telegram <span>↗</span></a>
+      </article>
+    </section>
+    <footer> LX ШАРАГА <span>·</span> Сделано для твоего учебного ритма <span class="footer-right" id="footerZone"></span></footer>
+  </main>
+
+  <dialog id="editorDialog" class="modal wide-modal">
+    <form method="dialog" class="modal-head"><div><span class="eyebrow">НАСТРОЙКА</span><h2>Редактор расписания</h2></div><button class="icon-btn" value="cancel">✕</button></form>
+    <div class="tabs"><button class="tab active" data-tab="subjects">Предметы</button><button class="tab" data-tab="bells">Звонки</button><button class="tab" data-tab="tools">Инструменты</button></div>
+    <div class="tab-content" id="tab-subjects">
+      <div class="editor-day-row"><label>День <select id="editorDay"></select></label><button class="soft-btn" id="copyDayBtn">Копировать в другой день</button></div>
+      <div id="subjectEditor"></div><button class="soft-btn full-btn" id="addLessonBtn">＋ Добавить урок</button>
+    </div>
+    <div class="tab-content hidden" id="tab-bells">
+      <p class="muted">Время звонков редактируется независимо от списка предметов.</p><div id="bellEditor"></div><div id="breakEditor"></div>
+    </div>
+    <div class="tab-content hidden" id="tab-tools">
+      <div class="tool-list">
+        <button class="soft-btn" id="exportICSBtn">Экспорт календаря (.ics)</button>
+        <label class="soft-btn file-label">Импорт JSON<input type="file" id="importFile" accept="application/json"></label>
+        <button class="soft-btn" id="backupBtn">Скачать резервную копию</button>
+        <button class="danger-btn" id="resetBtn">Восстановить исходное расписание</button>
+      </div>
+      <p class="muted">Изменения сохраняются в браузере и автоматически публикуются в подключённый GitHub-репозиторий. Локальный Python-сервис забирает обновления из этого репозитория.</p>
+    </div>
+    <div class="modal-foot"><span id="saveStatus">Изменения сохраняются автоматически</span><button class="primary-btn" id="doneEditing">Готово</button></div>
+  </dialog>
+
+  <dialog id="settingsDialog" class="modal">
+    <form method="dialog" class="modal-head"><div><span class="eyebrow">ПЕРСОНАЛИЗАЦИЯ</span><h2>Настройки</h2></div><button class="icon-btn" value="cancel">✕</button></form>
+    <label class="setting-row"><span>Тема интерфейса</span><select id="themeSelect"><option value="light">Светлая</option><option value="dark">Тёмная</option></select></label>
+    <label class="setting-row"><span>Анимация фона</span><input type="checkbox" id="motionToggle" checked></label>
+    <label class="setting-row"><span>Часовой пояс устройства</span><strong id="settingsZone">—</strong></label>
+    <div class="setting-row"><span>GitHub owner / username</span><input id="ghOwner" placeholder="username"></div>
+    <div class="setting-row"><span>Repository</span><input id="ghRepo" placeholder="lx-sharaga"></div>
+    <div class="setting-row"><span>Branch</span><input id="ghBranch" value="main"></div>
+    <div class="setting-row"><span>Путь к файлу</span><input id="ghPath" value="data/schedule.json"></div>
+    <div class="setting-row"><span>Fine-grained GitHub token</span><input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_…"></div>
+    <div class="note">Токен хранится только в sessionStorage этой вкладки и не попадает в репозиторий. Создай Fine-grained token с доступом только к нужному репозиторию и разрешением Contents: Read and write. Не используй классический токен с широкими правами.</div>
+    <button class="soft-btn full-btn" id="githubSaveBtn" type="button">Сохранить подключение GitHub</button>
+    <button class="primary-btn full-btn" id="githubSyncBtn" type="button">Синхронизировать расписание сейчас</button>
+    <div class="note" id="githubStatus">GitHub не подключён.</div>
+    <div class="note">Сайт использует локальное время устройства. Часовой пояс Python-сервиса задаётся отдельно в файле .env.</div>
+    <button class="primary-btn full-btn" id="settingsDone">Сохранить</button>
+  </dialog>
+
+  <dialog id="telegramDialog" class="modal">
+    <form method="dialog" class="modal-head"><div><span class="eyebrow">TELEGRAM</span><h2>Подключение уведомлений</h2></div><button class="icon-btn" value="cancel">✕</button></form>
+    <ol class="instructions"><li>Нажми «Подключить Telegram» на главной странице.</li><li>В Telegram откроется бот <code>@zvonki_school_bot</code>.</li><li>Нажми «Запустить» или отправь <code>/start</code>.</li><li>Бот подтвердит подключение сообщением.</li></ol>
+    <div class="note">Сайт размещается отдельно и не содержит секретного токена. Для автоматической отправки напоминаний Telegram-бот должен работать через твой локальный Python-сервис на компьютере.</div>
+    <button class="primary-btn full-btn" id="telegramDone">Понятно</button>
+  </dialog>
+  <script src="./script.js"></script>
+</body>
+</html>

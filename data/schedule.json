@@ -1,0 +1,303 @@
+{
+  "version": 1,
+  "baseStart": "2026-11-09",
+  "schedule": [
+    [
+      {
+        "subject": "Разговоры о важном",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Информатика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Информатика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Алгебра",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Алгебра",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      }
+    ],
+    [
+      {
+        "subject": "Англ. язык",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физкультура",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Геометрия",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Геометрия",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "История",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Литература",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Литература",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      }
+    ],
+    [
+      {
+        "subject": "Алгебра",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Алгебра",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Обществознание",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "ОБЗР",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "География",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Информатика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Информатика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      }
+    ],
+    [
+      {
+        "subject": "Рус. язык",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Рус. язык",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физика",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "История",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Обществознание",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Литература",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Физкультура",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      }
+    ],
+    [
+      {
+        "subject": "Геометрия",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "ВиС",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Англ. язык",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Англ. язык",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Биология",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      },
+      {
+        "subject": "Химия",
+        "room": "",
+        "teacher": "",
+        "description": ""
+      }
+    ],
+    [],
+    []
+  ],
+  "bells": [
+    {
+      "start": "08:30",
+      "end": "09:10"
+    },
+    {
+      "start": "09:20",
+      "end": "10:00"
+    },
+    {
+      "start": "10:15",
+      "end": "10:55"
+    },
+    {
+      "start": "11:10",
+      "end": "11:50"
+    },
+    {
+      "start": "12:05",
+      "end": "12:45"
+    },
+    {
+      "start": "13:00",
+      "end": "13:40"
+    },
+    {
+      "start": "13:50",
+      "end": "14:30"
+    },
+    {
+      "start": "14:50",
+      "end": "15:30"
+    }
+  ],
+  "breaks": [
+    [
+      "09:10",
+      "09:20"
+    ],
+    [
+      "10:00",
+      "10:15"
+    ],
+    [
+      "10:55",
+      "11:10"
+    ],
+    [
+      "11:50",
+      "12:05"
+    ],
+    [
+      "12:45",
+      "13:00"
+    ],
+    [
+      "13:40",
+      "13:50"
+    ],
+    [
+      "14:30",
+      "14:50"
+    ]
+  ],
+  "exceptions": {},
+  "settings": {
+    "theme": "light",
+    "motion": true
+  }
+}
