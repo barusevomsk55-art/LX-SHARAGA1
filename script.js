@@ -27,7 +27,7 @@ let apiOnline=false;
 function apiStatus(message){const el=byId("apiStatus");if(el)el.textContent=message}
 function save(){localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));const status=byId("saveStatus");if(status)status.textContent="Изменения сохранены в браузере"}
 async function apiRequest(path,options={}) {
-  const url=API_BASE+path+(path==="/api/schedule"?"?profile_id="+encodeURIComponent(profileId):"");
+  const url=API_BASE+path+((path==="/api/schedule"||path==="/api/telegram/status")?"?profile_id="+encodeURIComponent(profileId):"");
   const response=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
   const payload=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(payload.error||("HTTP "+response.status));
@@ -36,6 +36,19 @@ async function apiRequest(path,options={}) {
 async function checkApi(){
   try{await apiRequest("/api/health");apiOnline=true;apiStatus("Сервер подключён. Расписание синхронизируется.");}
   catch(e){apiOnline=false;apiStatus("Сервер недоступен: "+e.message);}
+}
+async function refreshTelegramStatus(){
+  const link=byId("telegramInfoBtn"),label=byId("telegramStatus");if(!link)return;
+  try{
+    const result=await apiRequest("/api/telegram/status");
+    if(result.linked){
+      link.classList.add("is-live");link.removeAttribute("href");link.removeAttribute("target");link.setAttribute("aria-disabled","true");link.innerHTML='<span class="live-pill-dot"></span> LIVE';
+      if(label)label.textContent="Telegram-аккаунт привязан";
+    }else{
+      link.classList.remove("is-live");link.href="https://t.me/zvonki_school_bot?start=lx_"+profileId;link.target="_blank";link.rel="noopener";link.removeAttribute("aria-disabled");link.innerHTML='Привязать Telegram-аккаунт <span>↗</span>';
+      if(label)label.textContent=localStorage.getItem("lx-sharaga-telegram-opened")==="1"?"Ожидаем подтверждение в Telegram…":"Telegram ещё не привязан";
+    }
+  }catch(e){if(label)label.textContent="Проверка привязки временно недоступна";}
 }
 async function pullSchedule(){
   try{
@@ -95,10 +108,10 @@ byId("exportICSBtn").onclick=exportICS;
 byId("settingsBtn").onclick=()=>{byId("themeSelect").value=data.settings.theme||"light";byId("motionToggle").checked=data.settings.motion!==false;byId("settingsDialog").showModal()};
 byId("settingsDone").onclick=()=>{applyTheme(byId("themeSelect").value);data.settings.motion=byId("motionToggle").checked;document.body.classList.toggle("no-motion",!data.settings.motion);save();byId("settingsDialog").close()};
 byId("themeToggle").onclick=()=>{applyTheme(data.settings.theme==="dark"?"light":"dark");save()};
-byId("telegramInfoBtn").addEventListener("click",()=>{localStorage.setItem("lx-sharaga-telegram-opened","1")});
+byId("telegramInfoBtn").addEventListener("click",()=>{localStorage.setItem("lx-sharaga-telegram-opened","1");const label=byId("telegramStatus");if(label)label.textContent="Ожидаем подтверждение в Telegram…";setTimeout(refreshTelegramStatus,1500)});
 byId("telegramDone").onclick=()=>byId("telegramDialog").close();
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));byId("tab-"+t.dataset.tab).classList.remove("hidden")});
 applyTheme(data.settings.theme||"light");if(data.settings.motion===false)document.body.classList.add("no-motion");
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
-renderAll();checkApi();pullSchedule();setInterval(renderClock,1000);
+renderAll();checkApi();pullSchedule();refreshTelegramStatus();setInterval(refreshTelegramStatus,5000);setInterval(renderClock,1000);
 })();
