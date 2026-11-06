@@ -41,7 +41,7 @@ async function pullSchedule(){
 }
 async function saveToServer(){
   let secret=sessionStorage.getItem("lx-api-secret");
-  if(!secret){secret=prompt("Введите пароль администратора из файла data/api_secret.txt");if(!secret)return;sessionStorage.setItem("lx-api-secret",secret);}
+  if(!secret){secret=prompt("Пароль для изменения расписания находится в файле data/api_secret.txt внутри папки Python-сервиса. Введите его:");if(!secret)return;sessionStorage.setItem("lx-api-secret",secret);}
   const button=byId("saveToServerBtn");if(button){button.disabled=true;button.textContent="Сохраняем…";}
   try{
     await apiRequest("/api/schedule",{method:"PUT",headers:{"Authorization":"Bearer "+secret},body:JSON.stringify(data)});
