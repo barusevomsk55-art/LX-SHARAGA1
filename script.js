@@ -17,7 +17,7 @@ const initial=()=>({version:1,baseStart:"2026-11-09",schedule:SUBJECTS.map(a=>a.
 let data;
 try{data=JSON.parse(localStorage.getItem("lx-sharaga-v3"))||initial()}catch{data=initial()}
 // Cloudflare Quick Tunnel URL. Обновляется при перезапуске Quick Tunnel.
-const API_BASE="https://ware-lot-smooth-knit.trycloudflare.com";
+const API_BASE="https://noted-columns-stuck-shark.trycloudflare.com";
 let apiOnline=false;
 function apiStatus(message){const el=byId("apiStatus");if(el)el.textContent=message}
 function save(){localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));const status=byId("saveStatus");if(status)status.textContent="Изменения сохранены в браузере"}
