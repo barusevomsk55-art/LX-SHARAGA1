@@ -27,3 +27,5 @@ body.dark .lesson-row.current{border-color:#554b83}
 body.dark .lesson-row.current .lesson-number{background:#8875ed;color:#fff}
 body.dark .break-row{border-color:#5c8eae;color:#8fc4e4}
 @media(max-width:700px){.top-actions{gap:7px}.theme-switch{gap:6px;padding:5px 8px 5px 5px}.theme-label{font-size:9px}.theme-track{width:48px;height:27px}.theme-thumb{width:21px;height:21px}.theme-thumb{left:3px;top:3px}body.dark .theme-thumb{transform:translateX(21px)}.icon-btn{width:35px;height:35px}}
+
+.telegram-link.is-live{background:linear-gradient(130deg,#20b879,#159b66);box-shadow:0 8px 18px #159b6633;pointer-events:none;cursor:default}.telegram-link.is-live:hover{transform:none;box-shadow:0 8px 18px #159b6633}.live-pill-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px #ffffff33;animation:livePulse 1.8s ease-in-out infinite}@keyframes livePulse{50%{box-shadow:0 0 0 7px #ffffff10;opacity:.7}}
