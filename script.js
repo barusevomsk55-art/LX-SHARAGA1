@@ -40,17 +40,14 @@ async function pullSchedule(){
   }catch(e){apiStatus("Не удалось загрузить расписание с сервера: "+e.message);}
 }
 async function saveToServer(){
-  let secret=sessionStorage.getItem("lx-api-secret");
-  if(!secret){secret=prompt("Пароль для изменения расписания находится в файле data/api_secret.txt внутри папки Python-сервиса. Введите его:");if(!secret)return;sessionStorage.setItem("lx-api-secret",secret);}
   const button=byId("saveToServerBtn");if(button){button.disabled=true;button.textContent="Сохраняем…";}
   try{
-    await apiRequest("/api/schedule",{method:"PUT",headers:{"Authorization":"Bearer "+secret},body:JSON.stringify(data)});
-    apiStatus("Расписание успешно сохранено на сервере. Telegram использует обновлённые данные.");
+    await apiRequest("/api/schedule",{method:"PUT",body:JSON.stringify(data)});
+    apiStatus("Расписание сохранено. Telegram использует обновлённые данные.");
     const status=byId("saveStatus");if(status)status.textContent="Сохранено на сервере";
   }catch(e){
-    if(/401|парол/i.test(e.message)){sessionStorage.removeItem("lx-api-secret");}
     apiStatus("Ошибка сохранения: "+e.message);
-    alert("Не удалось сохранить расписание на сервере: "+e.message);
+    alert("Не удалось сохранить расписание: "+e.message);
   }finally{if(button){button.disabled=false;button.textContent="Сохранить расписание";}}
 }
 let selectedDate=new Date(); selectedDate.setHours(0,0,0,0);
@@ -89,7 +86,7 @@ byId("resetBtn").onclick=()=>{if(confirm("Восстановить исходн�
 byId("importFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(!obj||!Array.isArray(obj.schedule)||obj.schedule.length!==7||!Array.isArray(obj.bells)||obj.bells.length!==8||!Array.isArray(obj.breaks)||obj.breaks.length!==7)throw Error("Неверная структура файла.");if(!obj.schedule.every(day=>Array.isArray(day)&&day.every(l=>l&&typeof l.subject==="string")))throw Error("Некорректный список уроков.");data={...data,...obj};save();renderAll();renderEditor();alert("Расписание импортировано.")}catch(err){alert("Не удалось импортировать JSON: "+err.message)}e.target.value=""};
 function exportICS(){let out=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//LX SHARAGA//Schedule//RU","CALSCALE:GREGORIAN"];const start=new Date("2026-11-09T00:00:00");for(let day=0;day<5;day++){const d=new Date(start);d.setDate(d.getDate()+day);lessonsFor(d).forEach((l,i)=>{const b=bellFor(i),stamp=t=>{const [h,m]=t.split(":");return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${h}${m}00`};out.push("BEGIN:VEVENT",`UID:lx-${dateKey(d)}-${i}@sharaga`,`DTSTART:${stamp(b.start)}`,`DTEND:${stamp(b.end)}`,`SUMMARY:${l.subject.replace(/[,;\\]/g,"\\$&")}`,"END:VEVENT")})}out.push("END:VCALENDAR");download("lx-sharaga.ics",out.join("\r\n"),"text/calendar;charset=utf-8")}
 byId("exportICSBtn").onclick=exportICS;
-byId("settingsBtn").onclick=()=>{initGithubSettings();byId("themeSelect").value=data.settings.theme||"light";byId("motionToggle").checked=data.settings.motion!==false;byId("settingsDialog").showModal()};
+byId("settingsBtn").onclick=()=>{byId("themeSelect").value=data.settings.theme||"light";byId("motionToggle").checked=data.settings.motion!==false;byId("settingsDialog").showModal()};
 byId("settingsDone").onclick=()=>{applyTheme(byId("themeSelect").value);data.settings.motion=byId("motionToggle").checked;document.body.classList.toggle("no-motion",!data.settings.motion);save();byId("settingsDialog").close()};
 byId("themeToggle").onclick=()=>{applyTheme(data.settings.theme==="dark"?"light":"dark");save()};
 byId("telegramInfoBtn").addEventListener("click",()=>{localStorage.setItem("lx-sharaga-telegram-opened","1")});
