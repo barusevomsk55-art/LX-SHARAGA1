@@ -99,9 +99,9 @@
         <button class="soft-btn" id="backupBtn">Скачать резервную копию</button>
         <button class="danger-btn" id="resetBtn">Восстановить исходное расписание</button>
       </div>
-      <p class="muted">Изменения сохраняются в браузере и автоматически публикуются в подключённый GitHub-репозиторий. Локальный Python-сервис забирает обновления из этого репозитория.</p>
+      <p class="muted">Изменения сначала сохраняются в этом браузере. Нажми «Сохранить расписание», чтобы отправить их на школьный сервер и обновить уведомления Telegram.</p>
     </div>
-    <div class="modal-foot"><span id="saveStatus">Изменения сохраняются автоматически</span><button class="primary-btn" id="doneEditing">Готово</button></div>
+    <div class="modal-foot"><span id="saveStatus">Изменения сохранены в браузере</span><div><button class="soft-btn" id="saveToServerBtn" type="button">Сохранить расписание</button> <button class="primary-btn" id="doneEditing" type="button">Готово</button></div></div>
   </dialog>
 
   <dialog id="settingsDialog" class="modal">
@@ -109,16 +109,8 @@
     <label class="setting-row"><span>Тема интерфейса</span><select id="themeSelect"><option value="light">Светлая</option><option value="dark">Тёмная</option></select></label>
     <label class="setting-row"><span>Анимация фона</span><input type="checkbox" id="motionToggle" checked></label>
     <label class="setting-row"><span>Часовой пояс устройства</span><strong id="settingsZone">—</strong></label>
-    <div class="setting-row"><span>GitHub owner / username</span><input id="ghOwner" placeholder="username"></div>
-    <div class="setting-row"><span>Repository</span><input id="ghRepo" placeholder="lx-sharaga"></div>
-    <div class="setting-row"><span>Branch</span><input id="ghBranch" value="main"></div>
-    <div class="setting-row"><span>Путь к файлу</span><input id="ghPath" value="data/schedule.json"></div>
-    <div class="setting-row"><span>Fine-grained GitHub token</span><input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_…"></div>
-    <div class="note">Токен хранится только в sessionStorage этой вкладки и не попадает в репозиторий. Создай Fine-grained token с доступом только к нужному репозиторию и разрешением Contents: Read and write. Не используй классический токен с широкими правами.</div>
-    <button class="soft-btn full-btn" id="githubSaveBtn" type="button">Сохранить подключение GitHub</button>
-    <button class="primary-btn full-btn" id="githubSyncBtn" type="button">Синхронизировать расписание сейчас</button>
-    <div class="note" id="githubStatus">GitHub не подключён.</div>
-    <div class="note">Сайт использует локальное время устройства. Часовой пояс Python-сервиса задаётся отдельно в файле .env.</div>
+    <div class="setting-row"><span>Часовой пояс устройства</span><strong id="settingsZone">—</strong></div>
+    <div class="note">Расписание сохраняется на сервере LX ШАРАГА. Для изменения общего расписания потребуется пароль администратора.</div>
     <button class="primary-btn full-btn" id="settingsDone">Сохранить</button>
   </dialog>
 
@@ -128,6 +120,6 @@
     <div class="note">Сайт размещается отдельно и не содержит секретного токена. Для автоматической отправки напоминаний Telegram-бот должен работать через твой локальный Python-сервис на компьютере.</div>
     <button class="primary-btn full-btn" id="telegramDone">Понятно</button>
   </dialog>
-  <script src="./script.js?v=20261106-2"></script>
+  <script src="./script.js?v=20261106-api1"></script>
 </body>
 </html>
