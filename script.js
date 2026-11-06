@@ -18,11 +18,17 @@ let data;
 try{data=JSON.parse(localStorage.getItem("lx-sharaga-v3"))||initial()}catch{data=initial()}
 // Cloudflare Quick Tunnel URL. Обновляется при перезапуске Quick Tunnel.
 const API_BASE="https://noted-columns-stuck-shark.trycloudflare.com";
+const PROFILE_KEY="lx-sharaga-profile-v1";
+let profileId=localStorage.getItem(PROFILE_KEY);
+if(!profileId){profileId=crypto.randomUUID?crypto.randomUUID():([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));localStorage.setItem(PROFILE_KEY,profileId);}
+const telegramLink=byId("telegramInfoBtn");
+if(telegramLink)telegramLink.href="https://t.me/zvonki_school_bot?start=lx_"+profileId;
 let apiOnline=false;
 function apiStatus(message){const el=byId("apiStatus");if(el)el.textContent=message}
 function save(){localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));const status=byId("saveStatus");if(status)status.textContent="Изменения сохранены в браузере"}
 async function apiRequest(path,options={}) {
-  const response=await fetch(API_BASE+path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
+  const url=API_BASE+path+(path==="/api/schedule"?"?profile_id="+encodeURIComponent(profileId):"");
+  const response=await fetch(url,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
   const payload=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(payload.error||("HTTP "+response.status));
   return payload;
@@ -36,14 +42,14 @@ async function pullSchedule(){
     const obj=await apiRequest("/api/schedule");
     if(!obj||!Array.isArray(obj.schedule)||obj.schedule.length!==7||!Array.isArray(obj.bells)||!Array.isArray(obj.breaks))throw new Error("Сервер вернул расписание неверного формата.");
     data={...data,...obj};localStorage.setItem("lx-sharaga-v3",JSON.stringify(data));renderAll();
-    apiStatus("Загружено актуальное школьное расписание с сервера.");
+    apiStatus("Загружено ваше личное расписание.");
   }catch(e){apiStatus("Не удалось загрузить расписание с сервера: "+e.message);}
 }
 async function saveToServer(){
   const button=byId("saveToServerBtn");if(button){button.disabled=true;button.textContent="Сохраняем…";}
   try{
     await apiRequest("/api/schedule",{method:"PUT",body:JSON.stringify(data)});
-    apiStatus("Расписание сохранено. Telegram использует обновлённые данные.");
+    apiStatus("Ваше расписание сохранено. Telegram использует только ваши данные.");
     const status=byId("saveStatus");if(status)status.textContent="Сохранено на сервере";
   }catch(e){
     apiStatus("Ошибка сохранения: "+e.message);
