@@ -1,5 +1,6 @@
 (() => {
 "use strict";
+const $=id=>document.getElementById(id);
 const DAYS=["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота","Воскресенье"];
 const SHORT=["ПН","ВТ","СР","ЧТ","ПТ","СБ","ВС"];
 const SUBJECTS=[
@@ -25,7 +26,7 @@ async function githubPull(){const c=githubConfig();if(!c.owner||!c.repo)return;c
 function initGithubSettings(){const c=githubConfig();$("ghOwner").value=c.owner||"";$("ghRepo").value=c.repo||"";$("ghBranch").value=c.branch||"main";$("ghPath").value=c.path||"data/schedule.json";$("ghToken").value="";if(c.owner&&c.repo)setGithubStatus("Репозиторий: "+c.owner+"/"+c.repo+" · токен нужно подключить в этой вкладке.")}
 $("githubSaveBtn").onclick=()=>{const c={owner:$("ghOwner").value.trim(),repo:$("ghRepo").value.trim(),branch:$("ghBranch").value.trim()||"main",path:$("ghPath").value.trim()||"data/schedule.json"};if(!c.owner||!c.repo){setGithubStatus("Укажи owner и repository.");return}localStorage.setItem("lx-gh-config",JSON.stringify(c));const t=$("ghToken").value.trim();if(t)sessionStorage.setItem("lx-gh-token",t);$("ghToken").value="";setGithubStatus("Настройки сохранены. Проверяю доступ…");githubPush().catch(e=>setGithubStatus("Ошибка: "+e.message))};
 $("githubSyncBtn").onclick=()=>githubPush().catch(e=>setGithubStatus("Ошибка: "+e.message));
-const $=id=>document.getElementById(id);
+
 let selectedDate=new Date(); selectedDate.setHours(0,0,0,0);
 let editorDay=0;
 const pad=n=>String(n).padStart(2,"0");
